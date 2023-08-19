@@ -20,23 +20,34 @@ int main()
 		<< " x "
 		<< image.getSize().y;
 
+
+	int height = image.getSize().y;
+	int width = image.getSize().x;
+
 	const sf::Uint8* pByteBuffer = image.getPixelsPtr();
+	std::vector<std::vector<int>> pixelBrightnessVec(height, std::vector<int>(width));
 
-	size_t numPixels = image.getSize().x * image.getSize().y;
-
-	for (int i = 0; i < image.getSize().y; i++)
+	for (int i = 0; i < height; i++)
 	{
-		/*std::cout << "[ ";*/
-		for (int j = 0; j < image.getSize().x; j++)
+		for (int j = 0; j < width; j++)
 		{
 
-			sf::Uint8 red = pByteBuffer[4 * (j * image.getSize().y + i) + 0];
-			sf::Uint8 green = pByteBuffer[4 * (j * image.getSize().y + i) + 1];
-			sf::Uint8 blue = pByteBuffer[4 * (j * image.getSize().y + i) + 2];
-			sf::Uint8 alpha = pByteBuffer[4 * (j * image.getSize().y + i) + 3];
-			std::cout << "[" <<static_cast<int>(red) << "," << static_cast<int>(green) << "," << static_cast<int>(blue) << "," << static_cast<int>(alpha) << "],";
+			sf::Uint8 red = pByteBuffer[4 * (j * height + i) + 0];
+			sf::Uint8 green = pByteBuffer[4 * (j * height + i) + 1];
+			sf::Uint8 blue = pByteBuffer[4 * (j * height + i) + 2];
+			int brightness = (0.23 * static_cast<int>(red)) + (0.72 * static_cast<int>(green)) + (0.072 * static_cast<int>(blue));
+			pixelBrightnessVec[i][j] = brightness;
+			//sf::Uint8 alpha = pByteBuffer[4 * (j * height + i) + 3];
+		/*	std::cout << "[" <<static_cast<int>(red) << "," << static_cast<int>(green) << "," << static_cast<int>(blue) << "," << static_cast<int>(alpha) << "],";*/
 		}
-		std::cout << "\n";
+	}
+
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			std::cout << pixelBrightnessVec[i][j] << std::endl;
+		}
 	}
 
 
