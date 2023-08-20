@@ -6,8 +6,8 @@
 int main()
 {
 	std::cout << "Hello\n";
-	sf::VideoMode vm(640, 480);
-	//sf::RenderWindow window(vm, "Timber");
+	sf::VideoMode vm(700, 467);
+	sf::RenderWindow window(vm, "ASCII ART");
 
 	sf::Image image;
 	if (!image.loadFromFile("./images/ascii-pineapple.jpg"))
@@ -21,9 +21,10 @@ int main()
 		<< image.getSize().y;
 
 
-	int height = image.getSize().y;
-	int width = image.getSize().x;
+	int height = image.getSize().x;
+	int width = image.getSize().y;
 
+	// Get pixel info
 	const sf::Uint8* pByteBuffer = image.getPixelsPtr();
 	std::vector<std::vector<int>> pixelBrightnessVec(height, std::vector<int>(width));
 
@@ -42,14 +43,56 @@ int main()
 		}
 	}
 
+
+	// Each char below, mapped from dimmest to brightest char (white on black), is +5 brightness
+	char asciiBrightness[66] = "`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
+	int brightnessUnit = 255 / 65;
+	std::vector<std::vector<char>> asciiVec(height, std::vector<char>(width));
+	std::string bigString = "";
+
 	for (int i = 0; i < height; i++)
 	{
 		for (int j = 0; j < width; j++)
 		{
-			std::cout << pixelBrightnessVec[i][j] << std::endl;
+			int charIndex = (pixelBrightnessVec[i][j] / brightnessUnit) % sizeof(asciiBrightness);
+			//std::cout << asciiBrightness[charIndex];
+			asciiVec[i][j] = asciiBrightness[charIndex];
+			bigString += asciiBrightness[charIndex];
 		}
+		bigString += "\n";
 	}
 
+	// Declare font
+	sf::Font font;
+
+	// Load from file
+	if (!font.loadFromFile("./images/arial.ttf"))
+	{
+		return -1;
+	}
+
+	// Create text using font
+	sf::Text text;
+
+	text.setFont(font);
+	text.setString(bigString);
+	text.setCharacterSize(1);
+
+	while (window.isOpen())
+	{
+		sf::Event event;
+		while (window.pollEvent(event))
+		{
+			if (event.type == sf::Event::Closed)
+			{
+				window.close();
+			}
+
+			window.clear(sf::Color::Black);
+			window.draw(text);
+			window.display();
+		}
+	}
 
 	return 0;
 }
