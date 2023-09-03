@@ -22,8 +22,32 @@ int main()
 	int height = photo.getSize().y;
 
 	std::cout << "Successfully loaded image!\n";
-	std::cout << std::format("Width: {}\n", width);
-	std::cout << std::format("Height: {}\n", height);
+	std::cout << std::format("Image size: {} x {}", width, height);
+	/*std::cout << std::format("Width: {}\n", width);
+	std::cout << std::format("Height: {}\n", height);*/
+
+	int NCOLS = width;
+	int NROWS = height;
+
+	// ### Get pixel info ###
+	// Get read-only pointer to array of pixels
+	const sf::Uint8* pByteBuffer = photo.getPixelsPtr();
+
+	std::vector<std::vector<int>> pixelBrightnessVec(NCOLS, std::vector<int>(NROWS));
+
+	for (int col = 0; col < NCOLS; col++)
+	{
+		for (int row = 0; row < NROWS; row++)
+		{
+			sf::Uint8 red = pByteBuffer[4 * (row * NCOLS + col) + 0];
+			sf::Uint8 green = pByteBuffer[4 * (row * NCOLS + col) + 1];
+			sf::Uint8 blue = pByteBuffer[4 * (row * NCOLS + col) + 2];
+			int brightness = (red + green + blue) / 3;
+			pixelBrightnessVec[col][row] = brightness;
+			std::cout << pixelBrightnessVec[col][row];
+		}
+		std::cout << std::endl;
+	}
 
 	/*Commented out*/
 	////std::cout << "Hello\n";
@@ -39,11 +63,13 @@ int main()
 	////std::cout << "Image size: " << image.getSize().x
 	////	<< " x "
 	////	<< image.getSize().y;
+	//// MISTAKE BELOW HEIGHT/WIDTH WRONG
 	////int height = image.getSize().x;
 	////int width = image.getSize().y;
 	////// Get pixel info
 	////const sf::Uint8* pByteBuffer = image.getPixelsPtr();
 	////std::vector<std::vector<int>> pixelBrightnessVec(height, std::vector<int>(width));
+	
 	////for (int i = 0; i < height; i++)
 	////{
 	////	for (int j = 0; j < width; j++)
