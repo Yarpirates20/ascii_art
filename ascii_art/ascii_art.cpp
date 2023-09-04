@@ -8,13 +8,14 @@
 const char ASCII_CHARS[66] = "`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
 const int MAX_PIXEL_VALUE = 255;
 
-std::vector<std::vector<int>> getIntensityVec(sf::Image&, std::string algorithmName="average");
+std::vector<std::vector<int>> getIntensityVec(sf::Image&, std::string algorithmName = "average");
 std::vector<std::vector<char>> getAsciiVec(std::vector<std::vector<int>>);
+//void displayAsText(sf::RenderWindow&, std::vector<std::vector<char>>);
 
 int main()
 {
 	// Create main window
-	//sf::RenderWindow window(sf::VideoMode(500, 334), "ASCII Art");
+	sf::RenderWindow window(sf::VideoMode(500, 334), "ASCII Art");
 
 	// Load image file from file
 	sf::Image photo;
@@ -51,6 +52,47 @@ int main()
 
 	std::vector<std::vector<int>> intensityVec = getIntensityVec(photo, "algorithm");
 	std::vector<std::vector<char>> asciiMatrix = getAsciiVec(intensityVec);
+	//displayAsText(window, asciiMatrix);
+	// Declare font
+	sf::Font font;
+	// load from file
+	if (!font.loadFromFile("./images/arial.ttf"))
+	{
+		std::cout << "Error!";
+		exit(-1);
+	}
+	// Create text using font
+	sf::Text text;
+	text.setFont(font);
+
+	// Create string
+	std::string bigString;
+	for (unsigned int y = 0; y < asciiMatrix.size(); y++)
+	{
+		for (unsigned int x = 0; x < asciiMatrix[0].size(); x++)
+		{
+			bigString += asciiMatrix[y][x];
+		}
+		bigString += "\n";
+	}
+
+	text.setString(bigString);
+	text.setCharacterSize(1);
+	text.setScale(5.f, 5.f);
+	while (window.isOpen())
+	{
+		sf::Event event;
+		while (window.pollEvent(event))
+		{
+			if (event.type == sf::Event::Closed)
+			{
+				window.close();
+			}
+			window.clear(sf::Color::Black);
+			window.draw(text);
+			window.display();
+		}
+	}
 
 	//for (unsigned int y = 0; y < intensityVec.size(); y++)
 	//{
@@ -115,6 +157,7 @@ int main()
 	////	}
 	////	bigString += "\n";
 	////}*/
+
 	////// Declare font
 	//////sf::Font font;
 	////// Load from file
@@ -208,4 +251,48 @@ std::vector<std::vector<char>> getAsciiVec(std::vector<std::vector<int>> intensi
 		asciiMatrix.push_back(asciiRow);
 	}
 	return asciiMatrix;
+}
+
+void displayAsText(sf::RenderWindow& window, std::vector<std::vector<char>> charMatrix)
+{
+	// Declare font
+	sf::Font font;
+	// load from file
+	if (!font.loadFromFile("./images/arial.ttf"))
+	{
+		std::cout << "Error!";
+		exit(-1);
+	}
+	// Create text using font
+	sf::Text text;
+	text.setFont(font);
+
+	// Create string
+	std::string bigString;
+	for (unsigned int y = 0; y < charMatrix.size(); y++)
+	{
+		for (unsigned int x = 0; x < charMatrix[0].size(); x++)
+		{
+			bigString += charMatrix[y][x];
+		}
+		bigString += "\n";
+	}
+
+	text.setString(bigString);
+	text.setCharacterSize(1);
+	text.setScale(5.f, 5.f);
+	while (window.isOpen())
+	{
+		sf::Event event;
+		while (window.pollEvent(event))
+		{
+			if (event.type == sf::Event::Closed)
+			{
+				window.close();
+			}
+			window.clear(sf::Color::Black);
+			window.draw(text);
+			window.display();
+		}
+	}
 }
