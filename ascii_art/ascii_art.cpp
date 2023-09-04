@@ -1,10 +1,12 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <vector>
-#include "Image.h"
 #include <string>
 #include <algorithm>
 #include <format>
+
+const char ASCII_CHARS[66] = "`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
+const int MAX_PIXEL_VALUE = 255;
 
 int main()
 {
@@ -33,20 +35,35 @@ int main()
 	// Get read-only pointer to array of pixels
 	const sf::Uint8* pByteBuffer = photo.getPixelsPtr();
 
-	std::vector<std::vector<int>> pixelBrightnessVec(NCOLS, std::vector<int>(NROWS));
+	std::vector<std::vector<int>> pixelBrightnessVec(height, std::vector<int>(width));
 
-	for (int col = 0; col < NCOLS; col++)
+	for (int x = 0; x < width; x++)
 	{
-		for (int row = 0; row < NROWS; row++)
+		for (int y = 0; y < height; y++)
 		{
-			sf::Uint8 red = pByteBuffer[4 * (row * NCOLS + col) + 0];
-			sf::Uint8 green = pByteBuffer[4 * (row * NCOLS + col) + 1];
-			sf::Uint8 blue = pByteBuffer[4 * (row * NCOLS + col) + 2];
+			
+			int loc = y * width + x;
+			sf::Uint8 red = pByteBuffer[4 * loc + 0];
+			sf::Uint8 green = pByteBuffer[4 * loc + 1];
+			sf::Uint8 blue = pByteBuffer[4 * loc + 2];
+			//sf::Uint8 alpha = pByteBuffer[4 * loc + 3];
 			int brightness = (red + green + blue) / 3;
-			pixelBrightnessVec[col][row] = brightness;
-			std::cout << pixelBrightnessVec[col][row];
+			pixelBrightnessVec[y][x] = brightness;
 		}
-		std::cout << std::endl;
+	}
+
+	std::vector<std::vector<char>> asciiMatrix;
+
+	for (int y = 0; y < pixelBrightnessVec.size(); y++)
+	{
+		std::vector<char> asciiRow;
+
+		for (int x = 0; x < pixelBrightnessVec[0].size(); x++)
+		{
+			int pix = pixelBrightnessVec[y][x] / MAX_PIXEL_VALUE * strlen(ASCII_CHARS) - 1;
+			asciiRow.push_back(ASCII_CHARS[pix]);
+		}
+		asciiMatrix.push_back(asciiRow);
 	}
 
 	/*Commented out*/
@@ -69,7 +86,7 @@ int main()
 	////// Get pixel info
 	////const sf::Uint8* pByteBuffer = image.getPixelsPtr();
 	////std::vector<std::vector<int>> pixelBrightnessVec(height, std::vector<int>(width));
-	
+
 	////for (int i = 0; i < height; i++)
 	////{
 	////	for (int j = 0; j < width; j++)
@@ -84,6 +101,7 @@ int main()
 	////	/*	std::cout << "[" <<static_cast<int>(red) << "," << static_cast<int>(green) << "," << static_cast<int>(blue) << "," << static_cast<int>(alpha) << "],";*/
 	////	}
 	////}
+
 	//// Each char below, mapped from dimmest to brightest char (white on black)
 	////*char asciiBrightness[66] = "`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
 	////int brightnessUnit = 255 / strlen(asciiBrightness);

@@ -142,10 +142,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ascii_art.cpp" />
-    <ClCompile Include="Image.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
