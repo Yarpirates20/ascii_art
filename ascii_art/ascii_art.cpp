@@ -8,6 +8,9 @@
 const char ASCII_CHARS[66] = "`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
 const int MAX_PIXEL_VALUE = 255;
 
+std::vector<std::vector<int>> getIntensityVec(sf::Image&, std::string algorithmName="average");
+std::vector<std::vector<char>> getAsciiVec(std::vector<std::vector<int>>);
+
 int main()
 {
 	// Create main window
@@ -20,51 +23,45 @@ int main()
 		return -1;
 	}
 
-	int width = photo.getSize().x;
-	int height = photo.getSize().y;
-
-	std::cout << "Successfully loaded image!\n";
-	std::cout << std::format("Image size: {} x {}", width, height);
+	//int width = photo.getSize().x;
+	//int height = photo.getSize().y;
+	//std::cout << "Successfully loaded image!\n";
+	//std::cout << std::format("Image size: {} x {}", width, height);
 	/*std::cout << std::format("Width: {}\n", width);
 	std::cout << std::format("Height: {}\n", height);*/
 
-	int NCOLS = width;
-	int NROWS = height;
-
 	// ### Get pixel info ###
 	// Get read-only pointer to array of pixels
-	const sf::Uint8* pByteBuffer = photo.getPixelsPtr();
+	//const sf::Uint8* pByteBuffer = photo.getPixelsPtr();
+	//std::vector<std::vector<int>> pixelBrightnessVec(height, std::vector<int>(width));
+	//for (int x = 0; x < width; x++)
+	//{
+	//	for (int y = 0; y < height; y++)
+	//	{
+	//		
+	//		int loc = y * width + x;
+	//		sf::Uint8 red = pByteBuffer[4 * loc + 0];
+	//		sf::Uint8 green = pByteBuffer[4 * loc + 1];
+	//		sf::Uint8 blue = pByteBuffer[4 * loc + 2];
+	//		//sf::Uint8 alpha = pByteBuffer[4 * loc + 3];
+	//		int brightness = (red + green + blue) / 3;
+	//		pixelBrightnessVec[y][x] = brightness;
+	//	}
+	//}
 
-	std::vector<std::vector<int>> pixelBrightnessVec(height, std::vector<int>(width));
+	std::vector<std::vector<int>> intensityVec = getIntensityVec(photo, "algorithm");
+	std::vector<std::vector<char>> asciiMatrix = getAsciiVec(intensityVec);
 
-	for (int x = 0; x < width; x++)
-	{
-		for (int y = 0; y < height; y++)
-		{
-			
-			int loc = y * width + x;
-			sf::Uint8 red = pByteBuffer[4 * loc + 0];
-			sf::Uint8 green = pByteBuffer[4 * loc + 1];
-			sf::Uint8 blue = pByteBuffer[4 * loc + 2];
-			//sf::Uint8 alpha = pByteBuffer[4 * loc + 3];
-			int brightness = (red + green + blue) / 3;
-			pixelBrightnessVec[y][x] = brightness;
-		}
-	}
-
-	std::vector<std::vector<char>> asciiMatrix;
-
-	for (int y = 0; y < pixelBrightnessVec.size(); y++)
-	{
-		std::vector<char> asciiRow;
-
-		for (int x = 0; x < pixelBrightnessVec[0].size(); x++)
-		{
-			int pix = pixelBrightnessVec[y][x] / MAX_PIXEL_VALUE * strlen(ASCII_CHARS) - 1;
-			asciiRow.push_back(ASCII_CHARS[pix]);
-		}
-		asciiMatrix.push_back(asciiRow);
-	}
+	//for (unsigned int y = 0; y < intensityVec.size(); y++)
+	//{
+	//	std::vector<char> asciiRow;
+	//	for (unsigned int x = 0; x < intensityVec[0].size(); x++)
+	//	{
+	//		int pix = intensityVec[y][x] / MAX_PIXEL_VALUE * strlen(ASCII_CHARS) - 1;
+	//		asciiRow.push_back(ASCII_CHARS[pix]);
+	//	}
+	//	asciiMatrix.push_back(asciiRow);
+	//}
 
 	/*Commented out*/
 	////std::cout << "Hello\n";
@@ -147,4 +144,68 @@ int main()
 	////}*/
 
 	return 0;
+}
+
+//Returns a pixel brightness intensity 2D vector of an image passed to the function
+//Calculates brightness depending on algorithm name provided
+std::vector<std::vector<int>> getIntensityVec(sf::Image& photo, std::string algorithmName)
+{
+	// Get read-only pointer to array of pixels
+	const sf::Uint8* pByteBuffer = photo.getPixelsPtr();
+	int width = photo.getSize().x;
+	int height = photo.getSize().y;
+
+	std::vector<std::vector<int>> pixelBrightnessVec(height, std::vector<int>(width));
+
+	for (int x = 0; x < width; x++)
+	{
+		for (int y = 0; y < height; y++)
+		{
+
+			int loc = y * width + x;
+			sf::Uint8 red = pByteBuffer[4 * loc + 0];
+			sf::Uint8 green = pByteBuffer[4 * loc + 1];
+			sf::Uint8 blue = pByteBuffer[4 * loc + 2];
+			//sf::Uint8 alpha = pByteBuffer[4 * loc + 3];
+
+			//int brightness;
+			// Use different algorithms to calculate brightness
+			if (algorithmName == "average")
+			{
+				int brightness = (red + green + blue) / 3;
+				pixelBrightnessVec[y][x] = brightness;
+			}
+			else if (algorithmName == "max_min")
+			{
+				int brightness = (std::max(std::max(red, green), blue) + std::min(std::min(red, green), blue)) / 2;
+				pixelBrightnessVec[y][x] = brightness;
+			}
+			else if (algorithmName == "luminosity")
+			{
+				int brightness = (0.21 * red) + (0.72 * green) + (0.07 * blue);
+				pixelBrightnessVec[y][x] = brightness;
+			}
+
+		}
+	}
+	return pixelBrightnessVec;
+}
+
+//Returns 2D char vector of chars in ASCII_CHARS based on brightness in intensity vector
+std::vector<std::vector<char>> getAsciiVec(std::vector<std::vector<int>> intensityVec)
+{
+	std::vector<std::vector<char>> asciiMatrix;
+
+	for (unsigned int y = 0; y < intensityVec.size(); y++)
+	{
+		std::vector<char> asciiRow;
+
+		for (unsigned int x = 0; x < intensityVec[0].size(); x++)
+		{
+			int pix = intensityVec[y][x] / MAX_PIXEL_VALUE * strlen(ASCII_CHARS) - 1;
+			asciiRow.push_back(ASCII_CHARS[pix]);
+		}
+		asciiMatrix.push_back(asciiRow);
+	}
+	return asciiMatrix;
 }
