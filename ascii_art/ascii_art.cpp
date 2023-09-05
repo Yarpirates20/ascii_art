@@ -8,21 +8,17 @@
 const char ASCII_CHARS[66] = "`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
 const int MAX_PIXEL_VALUE = 255;
 
-std::vector<std::vector<int>> getIntensityVec(sf::Image&, std::string algorithmName = "average");
+std::vector<std::vector<int>> getIntensityVec(std::string algorithmName);
 std::vector<std::vector<char>> getAsciiVec(std::vector<std::vector<int>>);
 //void displayAsText(sf::RenderWindow&, std::vector<std::vector<char>>);
 
 int main()
 {
 	// Create main window
-	sf::RenderWindow window(sf::VideoMode(500, 334), "ASCII Art");
+	sf::VideoMode vm(500, 334);
+	sf::RenderWindow window(vm, "ASCII Art");
 
-	// Load image file from file
-	sf::Image photo;
-	if (!photo.loadFromFile("./images/ascii-pineapple-small.jpg"))
-	{
-		return -1;
-	}
+
 
 	//int width = photo.getSize().x;
 	//int height = photo.getSize().y;
@@ -50,16 +46,16 @@ int main()
 	//	}
 	//}
 
-	std::vector<std::vector<int>> intensityVec = getIntensityVec(photo, "algorithm");
+	std::vector<std::vector<int>> intensityVec = getIntensityVec("average");
 	std::vector<std::vector<char>> asciiMatrix = getAsciiVec(intensityVec);
 	//displayAsText(window, asciiMatrix);
+
 	// Declare font
 	sf::Font font;
 	// load from file
 	if (!font.loadFromFile("./images/arial.ttf"))
 	{
-		std::cout << "Error!";
-		exit(-1);
+		return(-1);
 	}
 	// Create text using font
 	sf::Text text;
@@ -153,6 +149,7 @@ int main()
 	////		int charIndex = (pixelBrightnessVec[i][j] / brightnessUnit) % sizeof(asciiBrightness);
 	////		//std::cout << asciiBrightness[charIndex];
 	////		asciiVec[i][j] = asciiBrightness[(255 - pixelBrightnessVec[i][j]) * 66 / 256];
+
 	////		bigString += asciiVec[i][j];
 	////	}
 	////	bigString += "\n";
@@ -191,8 +188,15 @@ int main()
 
 //Returns a pixel brightness intensity 2D vector of an image passed to the function
 //Calculates brightness depending on algorithm name provided
-std::vector<std::vector<int>> getIntensityVec(sf::Image& photo, std::string algorithmName)
+std::vector<std::vector<int>> getIntensityVec(std::string algorithmName)
 {
+	// Load image file from file
+	sf::Image photo;
+	if (!photo.loadFromFile("./images/ascii-pineapple-small.jpg"))
+	{
+		exit(-1);
+	}
+
 	// Get read-only pointer to array of pixels
 	const sf::Uint8* pByteBuffer = photo.getPixelsPtr();
 	int width = photo.getSize().x;
@@ -211,24 +215,30 @@ std::vector<std::vector<int>> getIntensityVec(sf::Image& photo, std::string algo
 			sf::Uint8 blue = pByteBuffer[4 * loc + 2];
 			//sf::Uint8 alpha = pByteBuffer[4 * loc + 3];
 
+
+			int brightness;
 			//int brightness;
 			// Use different algorithms to calculate brightness
-			if (algorithmName == "average")
+			if (algorithmName.compare("average") == 0)
 			{
-				int brightness = (red + green + blue) / 3;
+				brightness = (red + green + blue) / 3;
 				pixelBrightnessVec[y][x] = brightness;
 			}
-			else if (algorithmName == "max_min")
+			else if (algorithmName.compare("max_min") == 0)
 			{
-				int brightness = (std::max(std::max(red, green), blue) + std::min(std::min(red, green), blue)) / 2;
+				brightness = (std::max(std::max(red, green), blue) + std::min(std::min(red, green), blue)) / 2;
 				pixelBrightnessVec[y][x] = brightness;
 			}
-			else if (algorithmName == "luminosity")
+			else if (algorithmName.compare("luminosity") == 0)
 			{
-				int brightness = (0.21 * red) + (0.72 * green) + (0.07 * blue);
+				brightness = (0.21 * red) + (0.72 * green) + (0.07 * blue);
 				pixelBrightnessVec[y][x] = brightness;
 			}
-
+			else
+			{
+				std::cout << "ERROR: not reading pixels.\n";
+				break;
+			}
 		}
 	}
 	return pixelBrightnessVec;
@@ -237,18 +247,23 @@ std::vector<std::vector<int>> getIntensityVec(sf::Image& photo, std::string algo
 //Returns 2D char vector of chars in ASCII_CHARS based on brightness in intensity vector
 std::vector<std::vector<char>> getAsciiVec(std::vector<std::vector<int>> intensityVec)
 {
-	std::vector<std::vector<char>> asciiMatrix;
+	std::vector<std::vector<char>> asciiMatrix (intensityVec.size(), std::vector<char>(intensityVec[0].size()));
+	const char* asciiBrightness = "`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
 
 	for (unsigned int y = 0; y < intensityVec.size(); y++)
 	{
-		std::vector<char> asciiRow;
+		//std::vector<char> asciiRow;
 
 		for (unsigned int x = 0; x < intensityVec[0].size(); x++)
 		{
-			int pix = intensityVec[y][x] / MAX_PIXEL_VALUE * strlen(ASCII_CHARS) - 1;
-			asciiRow.push_back(ASCII_CHARS[pix]);
+			unsigned int pix = asciiBrightness[(255 - intensityVec[y][x] * strlen(asciiBrightness) / 256)];
+			// Check if index is less than the size of the ASCII_CHARS array
+			if (pix < strlen(asciiBrightness))
+			{
+				asciiMatrix[y][x] = asciiBrightness[pix];
+			}
 		}
-		asciiMatrix.push_back(asciiRow);
+		//asciiMatrix.push_back(asciiRow);
 	}
 	return asciiMatrix;
 }
