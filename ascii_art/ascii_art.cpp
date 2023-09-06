@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <format>
 
-const char ASCII_CHARS[66] = "`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
+const char* ASCII_CHARS = "`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
 const int MAX_PIXEL_VALUE = 255;
 
 std::vector<std::vector<int>> getIntensityVec(std::string algorithmName);
@@ -46,7 +46,7 @@ int main()
 	//	}
 	//}
 
-	std::vector<std::vector<int>> intensityVec = getIntensityVec("average");
+	std::vector<std::vector<int>> intensityVec = getIntensityVec("luminosity");
 	std::vector<std::vector<char>> asciiMatrix = getAsciiVec(intensityVec);
 	//displayAsText(window, asciiMatrix);
 
@@ -67,10 +67,12 @@ int main()
 	{
 		for (unsigned int x = 0; x < asciiMatrix[0].size(); x++)
 		{
-			bigString += asciiMatrix[y][x];
+			bigString += std::string(3, asciiMatrix[y][x]);
 		}
 		bigString += "\n";
 	}
+
+	std::cout << bigString << std::endl;
 
 	text.setString(bigString);
 	text.setCharacterSize(1);
@@ -247,7 +249,7 @@ std::vector<std::vector<int>> getIntensityVec(std::string algorithmName)
 //Returns 2D char vector of chars in ASCII_CHARS based on brightness in intensity vector
 std::vector<std::vector<char>> getAsciiVec(std::vector<std::vector<int>> intensityVec)
 {
-	std::vector<std::vector<char>> asciiMatrix (intensityVec.size(), std::vector<char>(intensityVec[0].size()));
+	std::vector<std::vector<char>> asciiMatrix(intensityVec.size(), std::vector<char>(intensityVec[0].size()));
 	const char* asciiBrightness = "`^\",:;Il!i~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
 
 	for (unsigned int y = 0; y < intensityVec.size(); y++)
@@ -256,12 +258,10 @@ std::vector<std::vector<char>> getAsciiVec(std::vector<std::vector<int>> intensi
 
 		for (unsigned int x = 0; x < intensityVec[0].size(); x++)
 		{
-			unsigned int pix = asciiBrightness[(255 - intensityVec[y][x] * strlen(asciiBrightness) / 256)];
-			// Check if index is less than the size of the ASCII_CHARS array
-			if (pix < strlen(asciiBrightness))
-			{
-				asciiMatrix[y][x] = asciiBrightness[pix];
-			}
+			//unsigned int pix = ASCII_CHARS[(255 - intensityVec[y][x] * strlen(ASCII_CHARS) / 256)];
+
+			asciiMatrix[y][x] = ASCII_CHARS[(255 - intensityVec[y][x] * strlen(ASCII_CHARS) / 256)];
+
 		}
 		//asciiMatrix.push_back(asciiRow);
 	}
